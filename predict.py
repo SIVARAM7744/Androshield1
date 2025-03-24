@@ -17,7 +17,7 @@ def extract_features_from_apk(apk_path):
     return vector
 
 # App interface
-st.title("Batch APK Malware Detection")
+st.title("ANDROSHIELD")
 
 # Custom CSS for buttons
 st.markdown(
