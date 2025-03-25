@@ -3,10 +3,8 @@ import pandas as pd
 from joblib import load
 from androguard.misc import AnalyzeAPK
 
-# Tải mô hình đã được huấn luyện từ file SVC.joblib
 model = load('SVC.joblib')
 
-# Danh sách các đặc trưng (permissions) trong mô hình
 features = [
     'android.permission.GET_ACCOUNTS', 'com.sonyericsson.home.permission.BROADCAST_BADGE',
     'android.permission.READ_PROFILE', 'android.permission.MANAGE_ACCOUNTS',
@@ -56,29 +54,27 @@ features = [
 ]
 
 
-# Hàm trích xuất đặc trưng từ file APK để dự đoán
+
 def extract_features_from_apk(apk_path):
     a, d, dx = AnalyzeAPK(apk_path)
     permissions = a.get_permissions()
 
-    # Chuẩn bị vector đặc trưng dựa trên quyền
     vector = [1 if feature in permissions else 0 for feature in features]
     return vector
 
 
-# Duyệt qua các tệp APK trong thư mục 'apks'
-apk_dir = 'File apk test/Benign'  # Cập nhật đúng thư mục chứa tệp APK
+apk_dir = 'File apk test/Benign'  
 apk_files = [f for f in os.listdir(apk_dir) if f.endswith('.apk')]
 
-# Dự đoán kết quả cho từng APK
+
 for apk_file in apk_files:
     apk_path = os.path.join(apk_dir, apk_file)
     feature_vector = extract_features_from_apk(apk_path)
 
-    # Chuyển đổi thành DataFrame một dòng để phù hợp với input của mô hình
+
     input_data = pd.DataFrame([feature_vector], columns=features)
 
-    # Dự đoán
+
     prediction = model.predict(input_data)
 
     print(f"APK: {apk_file} - Prediction: {'Malware' if prediction[0] == 1 else 'Benign'}")
