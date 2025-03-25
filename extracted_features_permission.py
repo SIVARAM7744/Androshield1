@@ -2,10 +2,9 @@ import os
 import pandas as pd
 from androguard.misc import AnalyzeAPK
 
-# Đọc dataset hiện có từ data.csv
 df_existing = pd.read_csv('data.csv')
 
-# Danh sách các đặc trưng (permissions) trong mô hình
+
 features = [
     'android.permission.GET_ACCOUNTS', 'com.sonyericsson.home.permission.BROADCAST_BADGE',
     'android.permission.READ_PROFILE', 'android.permission.MANAGE_ACCOUNTS',
@@ -47,46 +46,45 @@ features = [
     'android.permission.VIBRATE', 'android.permission.NFC',
     'android.permission.RECEIVE_USER_PRESENT', 'android.permission.CLEAR_APP_CACHE',
     'com.android.launcher.permission.UNINSTALL_SHORTCUT',
-    # Các quyền mới bạn muốn thêm vào
+
     'com.sec.android.iap.permission.BILLING', 'com.htc.launcher.permission.UPDATE_SHORTCUT',
     'com.sec.android.provider.badge.permission.WRITE', 'android.permission.ACCESS_NETWORK_STATE',
     'com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE', 'com.huawei.android.launcher.permission.READ_SETTINGS',
     'android.permission.READ_SMS', 'android.permission.PROCESS_INCOMING_CALLS',
-    # Cột Result sẽ có giá trị mặc định là 1
+
     'Result'
 ]
 
-# Hàm trích xuất đặc trưng từ file APK
+
 def extract_features_from_apk(apk_path):
     a, d, dx = AnalyzeAPK(apk_path)
     permissions = a.get_permissions()
 
-    # Chuẩn bị vector đặc trưng dựa trên quyền
+
     vector = {feature: 1 if feature in permissions else 0 for feature in features}
-    vector['Result'] = 0  # Gán Result = 1 vì đang trích xuất mã độc
+    vector['Result'] = 0  
     return vector
 
-# Duyệt qua các tệp APK trong thư mục 'apks'
-apk_dir = 'File apk test/Benign'  # Cập nhật đúng thư mục chứa tệp APK
+
+apk_dir = 'File apk test/Benign'  
 apk_files = [f for f in os.listdir(apk_dir) if f.endswith('.apk')]
 
-# Tạo DataFrame từ các APK mới
+
 new_data = []
 for apk_file in apk_files:
     apk_path = os.path.join(apk_dir, apk_file)
     feature_vector = extract_features_from_apk(apk_path)
-    feature_vector['apk_name'] = apk_file  # Nếu bạn muốn giữ tên file APK
+    feature_vector['apk_name'] = apk_file  
     new_data.append(feature_vector)
 
 df_new = pd.DataFrame(new_data)
 
-# Gộp dữ liệu cũ và mới
 df_combined = pd.concat([df_existing, df_new], ignore_index=True)
 
-# Xóa cột 'apk_name'
+
 df_combined = df_combined.drop(columns=['apk_name'])
 
-# Lưu DataFrame kết hợp vào 'data.csv'
+
 df_combined.to_csv('data.csv', index=False)
 
 print("Extraction completed and data saved to 'data.csv'")
